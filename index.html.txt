@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreavmatik Search</title>
+    
+    <style>
+        body {
+            background-color: #0b0f19; 
+            color: #f8fafc; 
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #1e1b4b, #311042);
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #a855f7; 
+            font-size: 2.2rem;
+            text-transform: uppercase;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            background-color: #111827;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #4c1d95;
+            box-sizing: border-box;
+        }
+
+        .search-box input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #374151;
+            background-color: #1f2937;
+            color: white;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+        }
+
+        .price-section {
+            margin-top: 15px;
+        }
+
+        .price-label {
+            display: flex;
+            justify-content: space-between;
+            color: #94a3b8;
+            margin-bottom: 5px;
+        }
+
+        .price-label #price-value {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .search-box input[type="range"] {
+            width: 100%;
+            accent-color: #38bdf8;
+        }
+
+        #results-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background-color: #1f2937;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #374151;
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .price-tag {
+            background-color: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .stock-tag {
+            color: #10b981;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .product-card h3 {
+            margin: 0 0 10px 0;
+            color: #ffffff;
+            text-transform: capitalize;
+        }
+
+        .product-card p {
+            color: #94a3b8;
+            margin: 0 0 20px 0;
+        }
+
+        .buy-btn {
+            display: block;
+            text-align: center;
+            background: linear-gradient(90deg, #a855f7, #38bdf8);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .welcome-msg {
+            text-align: center;
+            color: #64748b;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>DREAVMATIK SEARCH</h1>
+        <p>Le premier moteur de recherche mondial instantané.</p>
+    </header>
+
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="🔍 Tape ce que tu veux (ex: pc, nike, ps5...)">
+        
+        <div class="price-section">
+            <div class="price-label">
+                <span>Budget Maximum :</span>
+                <span id="price-value">2000 €</span>
+            </div>
+            <input type="range" id="price-input" min="10" max="2000" value="2000">
+        </div>
+    </div>
+
+    <main id="results-container">
+        <div class="welcome-msg">En attente de votre recherche... Tape un mot pour générer l'objet !</div>
+    </main>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const priceInput = document.getElementById('price-input');
+        const priceValue = document.getElementById('price-value');
+        const resultsContainer = document.getElementById('results-container');
+
+        function handleSearch() {
+            const query = searchInput.value.trim();
+            const budgetMax = parseInt(priceInput.value);
+            
+            // Met à jour l'affichage du prix en direct
+            priceValue.textContent = budgetMax + " €";
+
+            if (query === "") {
+                resultsContainer.innerHTML = '<div class="welcome-msg">En attente de votre recherche... Tape un mot pour générer l\'objet !</div>';
+                return;
+            }
+
+            // Calcul du prix automatique basé sur le mot tapé
+            let hash = 0;
+            for (let i = 0; i < query.length; i++) {
+                hash = query.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            let generatedPrice = Math.abs(hash % 1400) + 15; 
+
+            // Adapte le prix si ça dépasse le budget
+            if (generatedPrice > budgetMax) {
+                generatedPrice = Math.round(budgetMax * 0.9);
+            }
+
+            // On injecte le résultat sans bug
+            resultsContainer.innerHTML = `
+                <article class="product-card">
+                    <div class="badge-container">
+                        <span class="price-tag">` + generatedPrice + ` €</span>
+                        <span class="stock-tag">✔️ Meilleur prix trouvé</span>
+                    </div>
+                    <h3>📦 ` + query + `</h3>
+                    <p>Voici l'offre exclusive trouvée pour "` + query + `". Cet article respecte parfaitement ton budget maximum de ` + budgetMax + ` €.</p>
+                    <a href="https://www.amazon.fr/s?k=` + encodeURIComponent(query) + `" target="_blank" class="buy-btn">🛒 Voir et acheter sur Amazon</a>
+                </article>
+            `;
+        }
+
+        searchInput.addEventListener('input', handleSearch);
+        priceInput.addEventListener('input', handleSearch);
+    </script>
+
+</body>
+</html>
